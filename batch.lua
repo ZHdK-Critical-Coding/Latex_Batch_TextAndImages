@@ -1,12 +1,39 @@
--- Reads source/<jobname>/ and writes LaTeX into the document.
--- The jobname is set with "lualatex -jobname=<folder>", so the
--- folder name decides which source is used.
+-- Reads all folders in source/ and writes LaTeX into the document.
+-- The layout of title, text and images is defined in template.tex
+-- (\itemtitle, \itemimage); this file only supplies the content.
 
 local batch = {}
-local folder = "source/" .. tex.jobname .. "/"
+local source = "source/"
 
--- read text.txt into a table of lines
-local function read_lines()
+-- Catcode table -2 prints a string "as is": & % # $ _ { } \ are
+-- normal characters, not LaTeX commands.
+local function print_raw(s)
+  tex.sprint(-2, s)
+end
+
+-- names in a folder that match a test, sorted alphabetically
+local function list(folder, test)
+  local names = {}
+  for name in lfs.dir(folder) do
+    if name:sub(1, 1) ~= "." and test(folder .. name, name) then
+      names[#names + 1] = name
+    end
+  end
+  table.sort(names)
+  return names
+end
+
+local function is_folder(path)
+  return lfs.attributes(path, "mode") == "directory"
+end
+
+local function is_image(_, name)
+  name = name:lower()
+  return name:match("%.jpe?g$") or name:match("%.png$")
+end
+
+-- text.txt as a table of lines
+local function read_lines(folder)
   local lines = {}
   local file = io.open(folder .. "text.txt", "r")
   if not file then
@@ -20,21 +47,15 @@ local function read_lines()
   return lines
 end
 
-local lines = read_lines()
+-- one folder: title, text (an empty line starts a new paragraph), images
+local function item(name)
+  local folder = source .. name .. "/"
+  local lines = read_lines(folder)
 
--- Catcode table -2 prints a string "as is": & % # $ _ { } \ are
--- normal characters, not LaTeX commands.
-local function print_raw(s)
-  tex.sprint(-2, s)
-end
+  tex.sprint("\\clearpage\\itemtitle{")
+  print_raw(lines[1] or name)
+  tex.sprint("}")
 
--- the first line of text.txt
-function batch.title()
-  print_raw(lines[1] or tex.jobname)
-end
-
--- all other lines; an empty line starts a new paragraph
-function batch.body()
   for i = 2, #lines do
     if lines[i]:match("^%s*$") then
       tex.sprint("\\par ")
@@ -43,23 +64,18 @@ function batch.body()
     end
   end
   tex.sprint("\\par ")
+
+  for _, image in ipairs(list(folder, is_image)) do
+    tex.sprint("\\itemimage{")
+    print_raw(folder .. image)
+    tex.sprint("}")
+  end
 end
 
--- every jpg/png in the folder on its own page, sorted by name
-function batch.images()
-  local names = {}
-  for name in lfs.dir(folder) do
-    if name:lower():match("%.jpe?g$") or name:lower():match("%.png$") then
-      names[#names + 1] = name
-    end
-  end
-  table.sort(names)
-
-  for _, name in ipairs(names) do
-    tex.sprint("\\clearpage\\null\\vfill\\begin{center}")
-    tex.sprint("\\includegraphics[width=\\textwidth,height=\\textheight,keepaspectratio]{")
-    print_raw(folder .. name)
-    tex.sprint("}\\end{center}\\vfill")
+-- every folder in source/, sorted by name
+function batch.items()
+  for _, name in ipairs(list(source, is_folder)) do
+    item(name)
   end
 end
 

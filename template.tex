@@ -1,6 +1,6 @@
-% One PDF for one folder in source/. Compile with LuaLaTeX:
-%   lualatex -jobname=glacier template.tex   ->   glacier.pdf from source/glacier/
-% build.sh / build.ps1 do this for every folder.
+% One PDF with all folders in source/. Compile with LuaLaTeX:
+%   lualatex -jobname=document -output-directory=output template.tex
+% build.sh / build.ps1 do exactly this.
 \documentclass[a4paper,11pt]{article}
 \usepackage[margin=20mm]{geometry}
 \usepackage{fontspec}   % Unicode text (äöü …); default font: Latin Modern
@@ -10,17 +10,23 @@
 \setlength{\parskip}{0.6em}
 \frenchspacing           % one normal space after a full stop
 
-% batch.lua reads the folder: batch.title(), batch.body(), batch.images()
+% the title of a folder (first line of text.txt)
+\newcommand{\itemtitle}[1]{{\Huge\bfseries #1\par}\vspace{1em}}
+
+% one image on its own page, fitted into the margins and centred
+\newcommand{\itemimage}[1]{%
+  \clearpage\null\vfill
+  \begin{center}
+    \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{#1}
+  \end{center}
+  \vfill}
+
+% batch.lua reads source/ and calls \itemtitle and \itemimage
 \directlua{batch = require("batch")}
 
 \begin{document}
 
-% ---- page 1: the text ----
-{\Huge\bfseries \directlua{batch.title()}\par}
-\vspace{1em}
-\directlua{batch.body()}
-
-% ---- one page per image ----
-\directlua{batch.images()}
+% for every folder: a new page with title and text, then one page per image
+\directlua{batch.items()}
 
 \end{document}

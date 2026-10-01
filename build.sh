@@ -1,16 +1,13 @@
 #!/bin/sh
-# Creates output/<folder>.pdf for every folder in source/.
+# Creates output/document.pdf with all folders in source/.
 # Usage: ./build.sh
 cd "$(dirname "$0")"
 mkdir -p output
 
-for dir in source/*/; do
-  item=$(basename "$dir")
-  echo "source/$item -> output/$item.pdf"
-  lualatex -interaction=nonstopmode -halt-on-error \
-    -jobname="$item" -output-directory=output template.tex > /dev/null \
-    || echo "  failed, see output/$item.log"
-done
+echo "source/ -> output/document.pdf"
+lualatex -interaction=nonstopmode -halt-on-error \
+  -jobname=document -output-directory=output template.tex > /dev/null \
+  || echo "  failed, see output/document.log"
 
-# remove the auxiliary files, keep the PDFs and logs
+# remove the auxiliary files, keep the PDF and the log
 rm -f output/*.aux
