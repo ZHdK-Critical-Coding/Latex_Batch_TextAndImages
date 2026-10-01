@@ -1,0 +1,26 @@
+% One PDF for one folder in source/. Compile with LuaLaTeX:
+%   lualatex -jobname=glacier template.tex   ->   glacier.pdf from source/glacier/
+% build.sh / build.ps1 do this for every folder.
+\documentclass[a4paper,11pt]{article}
+\usepackage[margin=20mm]{geometry}
+\usepackage{fontspec}   % Unicode text (äöü …); default font: Latin Modern
+\usepackage{graphicx}   % \includegraphics
+\pagestyle{empty}       % no page numbers
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.6em}
+\frenchspacing           % one normal space after a full stop
+
+% batch.lua reads the folder: batch.title(), batch.body(), batch.images()
+\directlua{batch = require("batch")}
+
+\begin{document}
+
+% ---- page 1: the text ----
+{\Huge\bfseries \directlua{batch.title()}\par}
+\vspace{1em}
+\directlua{batch.body()}
+
+% ---- one page per image ----
+\directlua{batch.images()}
+
+\end{document}
