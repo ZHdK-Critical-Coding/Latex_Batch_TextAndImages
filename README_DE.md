@@ -3,15 +3,14 @@
 [English](README.md)
 
 Macht aus allen Ordnern in `source/` ein PDF: jeder Ordner beginnt auf
-einer neuen Seite mit dem Text aus `text.txt`, danach folgt jedes Bild aus
+einer neuen Seite mit dem Text aus seiner `.txt`-Datei, danach folgt jedes Bild aus
 dem Ordner auf einer eigenen Seite. Eine Vorlage, beliebig viel Material – einen Ordner hinzufügen und das
-Script nochmals ausführen. Geschrieben in LaTeX und
-übersetzt mit LuaLaTeX, dessen eingebaute Lua-Programmierung den Ordner und
-die Textdatei liest.
+Script nochmals ausführen. Ein Shell-Script sammelt die
+Ordner in einer LaTeX-Datei, XeLaTeX macht daraus das PDF.
 
 ## Installation
 
-Voraussetzungen: eine TeX-Distribution mit LuaLaTeX, ein Terminal. Die
+Voraussetzungen: eine TeX-Distribution mit XeLaTeX, ein Terminal. Die
 Vorlage verwendet nur Standardpakete (`geometry`, `fontspec`, `graphicx`).
 
 Eine TeX-Distribution installieren:
@@ -28,9 +27,9 @@ Eine TeX-Distribution installieren:
   erlauben, fehlende Pakete automatisch nachzuinstallieren; der erste
   Durchlauf lädt dann herunter, was er braucht.
 - **Linux**: [TeX Live](https://tug.org/texlive/), z. B.
-  `sudo apt install texlive-luatex texlive-latex-extra`.
+  `sudo apt install texlive-xetex texlive-latex-extra`.
 
-Die Installation mit `lualatex --version` prüfen. Ein Editor mit
+Die Installation mit `xelatex --version` prüfen. Ein Editor mit
 LaTeX-Unterstützung hilft, z. B. Visual Studio Code mit der Erweiterung
 **LaTeX Workshop**.
 
@@ -43,7 +42,7 @@ Das Ausgangsmaterial liegt in `source/`, ein Ordner pro Abschnitt:
 ```
 source/
   glacier/
-    text.txt     erste Zeile: Titel; eine Leerzeile beginnt einen neuen Absatz
+    text.txt     beliebige .txt-Datei; erste Zeile: Titel; eine Leerzeile beginnt einen neuen Absatz
     01.jpg       Bilder (jpg, png), in alphabetischer Reihenfolge gesetzt
     02.jpg
   harbour/
@@ -62,37 +61,38 @@ Script nochmals ausführen. Ein bestehendes PDF wird überschrieben. Schlägt es
 Dasselbe von Hand:
 
 ```sh
-lualatex -jobname=document -output-directory=output template.tex
+xelatex -jobname=document -output-directory=output template.tex
 ```
 
 ## Coding-Hilfe
 
 LaTeX kann die Dateien eines Ordners nicht selbst auflisten. Das übernimmt
-der Lua-Code in `batch.lua`, der den Inhalt aller Ordner ins Dokument
-schreibt; wie er aussieht, legt `template.tex` fest.
+das Build-Script und schreibt den Inhalt aller Ordner in
+`output/content.tex`; wie er aussieht, legt `template.tex` fest, das diese
+Datei einbindet.
 
-- **`build.sh` / `build.ps1`**: rufen einmal
-  `lualatex -jobname=document -output-directory=output template.tex` auf;
-  der Jobname benennt das PDF. `-interaction=nonstopmode -halt-on-error` bricht beim ersten Fehler
-  ab, statt auf eine Eingabe zu warten. Die Hilfsdateien `.aux` werden am
-  Schluss gelöscht.
+- **`build.sh` / `build.ps1`**: gehen die Ordner in `source/` durch
+  (alphabetisch) und schreiben für jeden:
+  - `\itemtitle{...}` mit der ersten Zeile der ersten `.txt`-Datei (oder
+    dem Ordnernamen, wenn es keine gibt),
+  - die übrigen Zeilen als normalen Text – eine Leerzeile beginnt einen
+    neuen Absatz, wie immer in LaTeX,
+  - ein `\itemimage{...}` pro Datei mit der Endung `jpg`, `jpeg` oder
+    `png`.
+
+  Die Funktion `escape` setzt einen Backslash vor `& % $ # _ { }` (und
+  ersetzt `\ ~ ^`), damit diese Zeichen gedruckt und nicht als
+  LaTeX-Befehle gelesen werden. Ohne sie sind LaTeX-Befehle im Text
+  möglich. Danach läuft einmal
+  `xelatex -jobname=document -output-directory=output template.tex`; der
+  Jobname benennt das PDF. `-interaction=nonstopmode -halt-on-error` bricht
+  beim ersten Fehler ab, statt auf eine Eingabe zu warten. Die
+  Hilfsdateien `.aux` werden am Schluss gelöscht.
 - **`template.tex`**: das Layout. `geometry` setzt die Ränder, `fontspec`
   erlaubt Unicode-Text und andere Schriften (z. B.
-  `\setmainfont{Helvetica}`), `graphicx` setzt die Bilder. `\itemtitle{...}` setzt den Titel eines
-  Ordners, `\itemimage{...}` stellt ein Bild auf eine eigene Seite,
-  eingepasst in die Ränder (`width=\textwidth, height=\textheight,
-  keepaspectratio`) und mit `\vfill` vertikal zentriert.
-  `\directlua{batch.items()}` führt mitten im Dokument den Lua-Code aus
-  und schreibt seinen Inhalt genau dort hin.
-- **`batch.lua` → `items()`**: `lfs.dir()` listet `source/` auf; die
-  Ordner werden mit `table.sort()` sortiert und einzeln an `item()`
-  übergeben.
-- **`batch.lua` → `item()` → Text**: `\clearpage` beginnt den Ordner auf
-  einer neuen Seite. `text.txt` wird Zeile für Zeile gelesen; die erste
-  Zeile kommt in `\itemtitle`. `tex.sprint(-2, s)` gibt einen String aus, bei dem jedes Zeichen
-  wörtlich genommen wird; `& % # $ _ { }` müssen also nicht maskiert
-  werden. Um LaTeX-Befehle im Text zu erlauben, stattdessen
-  `tex.sprint(s)` verwenden. Eine Leerzeile wird zu `\par`.
-- **`batch.lua` → `item()` → Bilder**: Dateien mit der Endung `jpg`,
-  `jpeg` oder `png` werden nach Namen sortiert, jede wird zu einem
-  `\itemimage{...}`.
+  `\setmainfont{Helvetica}`), `graphicx` setzt die Bilder.
+  `\itemtitle{...}` beginnt eine neue Seite mit dem Titel eines Ordners,
+  `\itemimage{...}` stellt ein Bild auf eine eigene Seite, eingepasst in
+  die Ränder (`width=\textwidth, height=\textheight, keepaspectratio`)
+  und mit `\vfill` vertikal zentriert. `\input{output/content.tex}` fügt
+  den erzeugten Inhalt ein.

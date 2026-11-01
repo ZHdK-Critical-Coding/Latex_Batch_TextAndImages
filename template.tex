@@ -1,32 +1,38 @@
-% One PDF with all folders in source/. Compile with LuaLaTeX:
-%   lualatex -jobname=document -output-directory=output template.tex
-% build.sh / build.ps1 do exactly this.
-\documentclass[a4paper,11pt]{article}
-\usepackage[margin=20mm]{geometry}
-\usepackage{fontspec}   % Unicode text (äöü …); default font: Latin Modern
+% One PDF with all folders in source/. build.sh / build.ps1 write the
+% content into output/content.tex and then compile this file with XeLaTeX:
+%   xelatex -jobname=document -output-directory=output template.tex
+\documentclass{article}
+\usepackage[a5paper,margin=12mm]{geometry}   % A5, 12 mm page border
+\usepackage{fontspec}   % system fonts and Unicode text (äöü …)
+\usepackage[ngerman]{babel}   % German hyphenation
 \usepackage{graphicx}   % \includegraphics
+\usepackage{adjustbox}  % scale images to cover the page
+\usepackage{eso-pic}    % place images on the page, ignoring the margins
 \pagestyle{empty}       % no page numbers
-\setlength{\parindent}{0pt}
-\setlength{\parskip}{0.6em}
 \frenchspacing           % one normal space after a full stop
 
-% the title of a folder (first line of text.txt)
-\newcommand{\itemtitle}[1]{{\Huge\bfseries #1\par}\vspace{1em}}
+% Helvetica 14/16 pt, regular only. Lines are 16 pt apart, the first
+% baseline is 16 pt below the top border, paragraphs are separated by
+% one empty line (16 pt). Text is justified (the LaTeX default).
+\setmainfont{Helvetica}
+\AtBeginDocument{\fontsize{14pt}{16pt}\selectfont}
+\setlength{\topskip}{16pt}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{16pt}
 
-% one image on its own page, fitted into the margins and centred
+% one image on its own page, full bleed: scaled to cover the whole page,
+% centred, whatever sticks out over the page edge is cut off
+% (\detokenize allows & and other special characters in the file name)
 \newcommand{\itemimage}[1]{%
-  \clearpage\null\vfill
-  \begin{center}
-    \includegraphics[width=\textwidth,height=\textheight,keepaspectratio]{#1}
-  \end{center}
-  \vfill}
-
-% batch.lua reads source/ and calls \itemtitle and \itemimage
-\directlua{batch = require("batch")}
+  \clearpage
+  \AddToShipoutPictureBG*{\AtPageCenter{\makebox[0pt]{\raisebox{-0.5\height}{%
+    \adjustbox{width=\paperwidth, min height=\paperheight}
+      {\includegraphics{\detokenize{#1}}}}}}}%
+  \null\clearpage}
 
 \begin{document}
 
-% for every folder: a new page with title and text, then one page per image
-\directlua{batch.items()}
+% for every folder: a new page with the text, then one page per image
+\input{output/content.tex}
 
 \end{document}
