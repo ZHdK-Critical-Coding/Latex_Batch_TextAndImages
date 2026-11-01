@@ -3,7 +3,7 @@
 [English](README.md)
 
 Macht aus allen Ordnern in `source/` ein PDF: jeder Ordner beginnt auf
-einer neuen Seite mit dem Text aus seiner `.txt`-Datei, danach folgt jedes Bild aus
+einer neuen Seite mit dem Text aus seiner `.txt`-Datei (optional, beliebiger Name), danach folgt jedes Bild aus
 dem Ordner auf einer eigenen Seite. Eine Vorlage, beliebig viel Material – einen Ordner hinzufügen und das
 Script nochmals ausführen. Ein Shell-Script sammelt die
 Ordner in einer LaTeX-Datei, XeLaTeX macht daraus das PDF.
@@ -11,7 +11,7 @@ Ordner in einer LaTeX-Datei, XeLaTeX macht daraus das PDF.
 ## Installation
 
 Voraussetzungen: eine TeX-Distribution mit XeLaTeX, ein Terminal. Die
-Vorlage verwendet nur Standardpakete (`geometry`, `fontspec`, `graphicx`).
+Vorlage verwendet nur Standardpakete (`geometry`, `fontspec`, `babel`, `graphicx`, `adjustbox`, `eso-pic`).
 
 Eine TeX-Distribution installieren:
 
@@ -42,7 +42,8 @@ Das Ausgangsmaterial liegt in `source/`, ein Ordner pro Abschnitt:
 ```
 source/
   glacier/
-    text.txt     beliebige .txt-Datei; erste Zeile: Titel; eine Leerzeile beginnt einen neuen Absatz
+    text.txt     optional, beliebiger Name mit Endung .txt (die erste wird verwendet);
+                 eine Leerzeile beginnt einen neuen Absatz
     01.jpg       Bilder (jpg, png), in alphabetischer Reihenfolge gesetzt
     02.jpg
   harbour/
@@ -54,7 +55,7 @@ Ein Terminal im Ordner des Repositorys öffnen und ausführen:
 - **macOS / Linux**: `./build.sh`
 - **Windows**: `powershell -ExecutionPolicy Bypass -File build.ps1`
 
-Das Script erzeugt `output/document.pdf` (A4, 20 mm Rand) mit den Ordnern
+Das Script erzeugt `output/document.pdf` (A5, 12 mm Rand, randabfallende Bilder) mit den Ordnern
 in alphabetischer Reihenfolge. Die Ordner in `source/` durch eigenes Material ersetzen und das
 Script nochmals ausführen. Ein bestehendes PDF wird überschrieben. Schlägt es fehl, steht der Fehler in `output/document.log`.
 
@@ -73,10 +74,10 @@ Datei einbindet.
 
 - **`build.sh` / `build.ps1`**: gehen die Ordner in `source/` durch
   (alphabetisch) und schreiben für jeden:
-  - `\itemtitle{...}` mit der ersten Zeile der ersten `.txt`-Datei (oder
-    dem Ordnernamen, wenn es keine gibt),
-  - die übrigen Zeilen als normalen Text – eine Leerzeile beginnt einen
-    neuen Absatz, wie immer in LaTeX,
+  - `\clearpage`, damit jeder Ordner auf einer neuen Seite beginnt,
+  - die erste `.txt`-Datei als normalen Text (gibt es keine, erhält der
+    Ordner keinen Text) – eine Leerzeile beginnt einen neuen Absatz, wie
+    immer in LaTeX,
   - ein `\itemimage{...}` pro Datei mit der Endung `jpg`, `jpeg` oder
     `png`.
 
@@ -88,11 +89,14 @@ Datei einbindet.
   Jobname benennt das PDF. `-interaction=nonstopmode -halt-on-error` bricht
   beim ersten Fehler ab, statt auf eine Eingabe zu warten. Die
   Hilfsdateien `.aux` werden am Schluss gelöscht.
-- **`template.tex`**: das Layout. `geometry` setzt die Ränder, `fontspec`
-  erlaubt Unicode-Text und andere Schriften (z. B.
-  `\setmainfont{Helvetica}`), `graphicx` setzt die Bilder.
-  `\itemtitle{...}` beginnt eine neue Seite mit dem Titel eines Ordners,
-  `\itemimage{...}` stellt ein Bild auf eine eigene Seite, eingepasst in
-  die Ränder (`width=\textwidth, height=\textheight, keepaspectratio`)
-  und mit `\vfill` vertikal zentriert. `\input{output/content.tex}` fügt
-  den erzeugten Inhalt ein.
+- **`template.tex`**: das Layout. `geometry` setzt A5 mit 12 mm Rand
+  (z. B. `a4paper` ausprobieren), `fontspec` erlaubt Unicode-Text und
+  Systemschriften (`\setmainfont{Helvetica}`), `babel` wählt die deutsche
+  Silbentrennung. Der Text steht in 14/16 pt im Blocksatz, mit einer
+  Leerzeile (16 pt) zwischen den Absätzen und der ersten Grundlinie 16 pt
+  unter dem Rand, wie in der Typst- und der CSS-Version.
+  `\itemimage{...}` stellt ein Bild randabfallend auf eine eigene Seite:
+  `eso-pic` setzt es in den Seitenhintergrund, unabhängig von den Rändern,
+  und `adjustbox` skaliert es so, dass es die ganze Seite bedeckt; was
+  übersteht, wird abgeschnitten. `\input{output/content.tex}` fügt den
+  erzeugten Inhalt ein.
