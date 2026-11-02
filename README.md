@@ -73,13 +73,14 @@ Every push to `main` builds the PDF on GitHub
 (`.github/workflows/build.yml`, with
 [GitHub Action for LaTeX](https://github.com/marketplace/actions/github-action-for-latex)).
 Download it in the **Actions** tab: open the run, then click
-**Download document.pdf** at the top of the page (or **Artifacts →
-document.pdf** at the bottom). You have to be signed in to GitHub; the
+**Download document_….pdf** at the top of the page (or **Artifacts →
+document_….pdf** at the bottom). The file name contains the creation
+date (Zurich time), e.g. `document_2026-11-02_1804.pdf`. You have to be signed in to GitHub; the
 PDF is kept for 90 days. **Run workflow** starts a build by hand.
 
 The latest PDF, with build date and page count, is always on the
 GitHub Page: <https://zhdk-critical-coding.github.io/Latex_Batch_TextAndImages/>. `site/index.html` is the page; the workflow
-fills in `{{DATE}}` and `{{PAGES}}` (from `output/document.log`) and
+fills in `{{FILE}}` (the dated file name), `{{DATE}}` and `{{PAGES}}` (from `output/document.log`) and
 publishes it together with the PDF. For your own repository, first set
 **Settings → Pages → Source** to **GitHub Actions**.
 

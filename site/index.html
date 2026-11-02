@@ -1,6 +1,7 @@
 <!doctype html>
 <!-- GitHub Page with a link to the latest PDF. The workflow replaces
-     {{DATE}} and {{PAGES}} and publishes this file with document.pdf. -->
+     {{FILE}} (e.g. document_2026-11-02_1804.pdf), {{DATE}} and {{PAGES}}
+     and publishes this file together with the PDF. -->
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -22,7 +23,7 @@
 <body>
   <main>
     <h1>Text and Images</h1>
-    <a class="pdf" href="document.pdf">document.pdf</a>
+    <a class="pdf" href="{{FILE}}">{{FILE}}</a>
     <p>{{PAGES}} pages · built {{DATE}}</p>
   </main>
 </body>
