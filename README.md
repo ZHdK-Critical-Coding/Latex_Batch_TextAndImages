@@ -77,6 +77,12 @@ Download it in the **Actions** tab: open the run, then click
 document.pdf** at the bottom). You have to be signed in to GitHub; the
 PDF is kept for 90 days. **Run workflow** starts a build by hand.
 
+The latest PDF, with build date and page count, is always on the
+GitHub Page: <https://zhdk-critical-coding.github.io/Latex_Batch_TextAndImages/>. `site/index.html` is the page; the workflow
+fills in `{{DATE}}` and `{{PAGES}}` (from `output/document.log`) and
+publishes it together with the PDF. For your own repository, first set
+**Settings → Pages → Source** to **GitHub Actions**.
+
 A tag starting with `v` also creates a release with the PDF attached:
 
 ```sh

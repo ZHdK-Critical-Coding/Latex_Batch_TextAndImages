@@ -78,6 +78,12 @@ Herunterladen im Tab **Actions**: den Durchlauf öffnen, dann oben auf
 document.pdf**). Dazu muss man bei GitHub angemeldet sein; das PDF wird
 90 Tage aufbewahrt. **Run workflow** startet einen Build von Hand.
 
+Das neueste PDF, mit Datum und Seitenzahl, steht immer auf der
+GitHub Page: <https://zhdk-critical-coding.github.io/Latex_Batch_TextAndImages/>. `site/index.html` ist die Seite; der Workflow
+setzt `{{DATE}}` und `{{PAGES}}` (aus `output/document.log`) ein und
+veröffentlicht sie zusammen mit dem PDF. Im eigenen Repository zuerst
+**Settings → Pages → Source** auf **GitHub Actions** stellen.
+
 Ein Tag, der mit `v` beginnt, erstellt zusätzlich ein Release mit dem PDF:
 
 ```sh
