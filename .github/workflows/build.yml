@@ -32,7 +32,7 @@ jobs:
             -file-line-error -halt-on-error -interaction=nonstopmode
             -jobname=document -output-directory=output
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: document
           path: output/document.pdf
