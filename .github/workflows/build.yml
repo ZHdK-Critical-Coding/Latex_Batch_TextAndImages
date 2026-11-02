@@ -1,5 +1,5 @@
 # Builds output/document.pdf on GitHub with every push and offers it for
-# download under Actions → (run) → Artifacts. Pushing a tag like v1.0
+# download: Actions → (run) → link at the top, or Artifacts at the bottom. Pushing a tag like v1.0
 # also creates a release with the PDF attached.
 name: Build PDF
 
@@ -32,10 +32,15 @@ jobs:
             -file-line-error -halt-on-error -interaction=nonstopmode
             -jobname=document -output-directory=output
 
-      - uses: actions/upload-artifact@v5
+      # upload the PDF as it is (not zipped), artifact name: document.pdf
+      - uses: actions/upload-artifact@v7
+        id: upload
         with:
-          name: document
           path: output/document.pdf
+          archive: false
+
+      # download link at the top of the run's summary page
+      - run: echo "### [Download document.pdf](${{ steps.upload.outputs.artifact-url }})" >> "$GITHUB_STEP_SUMMARY"
 
       # only for tags (v1.0, v2.3, …): release with the PDF
       - if: startsWith(github.ref, 'refs/tags/v')

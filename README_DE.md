@@ -73,8 +73,10 @@ xelatex -jobname=document -output-directory=output template.tex
 Jeder Push auf `main` erzeugt das PDF auf GitHub
 (`.github/workflows/build.yml`, mit
 [GitHub Action for LaTeX](https://github.com/marketplace/actions/github-action-for-latex)).
-Herunterladen im Tab **Actions**: den Durchlauf öffnen, dann **Artifacts →
-document**. **Run workflow** startet einen Build von Hand.
+Herunterladen im Tab **Actions**: den Durchlauf öffnen, dann oben auf
+**Download document.pdf** klicken (oder unten **Artifacts →
+document.pdf**). Dazu muss man bei GitHub angemeldet sein; das PDF wird
+90 Tage aufbewahrt. **Run workflow** startet einen Build von Hand.
 
 Ein Tag, der mit `v` beginnt, erstellt zusätzlich ein Release mit dem PDF:
 
