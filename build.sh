@@ -1,6 +1,7 @@
 #!/bin/sh
 # Creates output/document.pdf with all folders in source/.
-# Usage: ./build.sh
+# Usage: ./build.sh                 (content and PDF)
+#        ./build.sh --content-only  (only output/content.tex, used on GitHub)
 cd "$(dirname "$0")"
 mkdir -p output
 
@@ -28,6 +29,7 @@ for folder in source/*/; do
     echo "\\itemimage{$folder$image}"
   done
 done > output/content.tex
+[ "$1" = "--content-only" ] && exit 0
 
 echo "source/ -> output/document.pdf"
 xelatex -interaction=nonstopmode -halt-on-error \

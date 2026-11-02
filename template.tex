@@ -11,10 +11,12 @@
 \pagestyle{empty}       % no page numbers
 \frenchspacing           % one normal space after a full stop
 
-% Helvetica 14/16 pt, regular only. Lines are 16 pt apart, the first
+% TeX Gyre Heros (a free Helvetica clone, fonts/) 14/16 pt, regular only.
+% It is loaded from the fonts/ folder, so the PDF looks the same on every
+% computer and on GitHub. Lines are 16 pt apart, the first
 % baseline is 16 pt below the top border, paragraphs are separated by
 % one empty line (16 pt). Text is justified (the LaTeX default).
-\setmainfont{Helvetica}
+\setmainfont{texgyreheros-regular.otf}[Path=fonts/]
 \AtBeginDocument{\fontsize{14pt}{16pt}\selectfont}
 \setlength{\topskip}{16pt}
 \setlength{\parindent}{0pt}

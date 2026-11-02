@@ -1,0 +1,44 @@
+# Builds output/document.pdf on GitHub with every push and offers it for
+# download under Actions → (run) → Artifacts. Pushing a tag like v1.0
+# also creates a release with the PDF attached.
+name: Build PDF
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:      # "Run workflow" button in the Actions tab
+
+permissions:
+  contents: write         # needed to create releases
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      # TeX Live in a container. pre_compile writes output/content.tex,
+      # then latexmk compiles template.tex with XeLaTeX.
+      - uses: xu-cheng/latex-action@v4
+        with:
+          root_file: template.tex
+          texlive_version: 2026          # fixed version: same result every time
+          latexmk_use_xelatex: true
+          extra_fonts: fonts/*.otf       # install the fonts in fonts/ in the container
+          pre_compile: ./build.sh --content-only
+          args: >-
+            -file-line-error -halt-on-error -interaction=nonstopmode
+            -jobname=document -output-directory=output
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: document
+          path: output/document.pdf
+
+      # only for tags (v1.0, v2.3, …): release with the PDF
+      - if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: output/document.pdf

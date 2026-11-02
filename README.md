@@ -28,11 +28,14 @@ Install a TeX distribution:
 - **Linux**: [TeX Live](https://tug.org/texlive/), e.g.
   `sudo apt install texlive-xetex texlive-latex-extra`.
 
+The font TeX Gyre Heros (a free Helvetica clone) is included in `fonts/`,
+nothing to install.
+
 Check the installation with `xelatex --version`. An editor with LaTeX
 support helps, e.g. Visual Studio Code with the extension **LaTeX
 Workshop**.
 
-License: MIT
+License: MIT. Font: TeX Gyre Heros, [GUST Font License](fonts/GUST-FONT-LICENSE.txt).
 
 ## How to Run
 
@@ -64,6 +67,26 @@ The same by hand:
 xelatex -jobname=document -output-directory=output template.tex
 ```
 
+## On GitHub
+
+Every push to `main` builds the PDF on GitHub
+(`.github/workflows/build.yml`, with
+[GitHub Action for LaTeX](https://github.com/marketplace/actions/github-action-for-latex)).
+Download it in the **Actions** tab: open the run, then **Artifacts →
+document**. **Run workflow** starts a build by hand.
+
+A tag starting with `v` also creates a release with the PDF attached:
+
+```sh
+git tag v1.0
+git push origin v1.0
+```
+
+The workflow uses TeX Live 2026 (`texlive_version`) and installs the
+fonts in `fonts/` (`extra_fonts`). `pre_compile` runs
+`./build.sh --content-only`, which writes only `output/content.tex`;
+the action then compiles `template.tex` with XeLaTeX.
+
 ## Coding Help
 
 LaTeX cannot list the files of a folder by itself. The build script does
@@ -83,10 +106,13 @@ that and writes the content of all folders into `output/content.tex`;
   Then `xelatex -jobname=document -output-directory=output template.tex`
   runs once; the jobname names the PDF. `-interaction=nonstopmode
   -halt-on-error` stops at the first error instead of waiting for input.
-  Auxiliary `.aux` files are deleted at the end.
+  Auxiliary `.aux` files are deleted at the end. `./build.sh
+  --content-only` stops after writing `output/content.tex` (used on
+  GitHub).
 - **`template.tex`**: the layout. `geometry` sets A5 with a 12 mm
-  border (try `a4paper`), `fontspec` allows Unicode text and system fonts
-  (`\setmainfont{Helvetica}`), `babel` selects German hyphenation. The
+  border (try `a4paper`), `fontspec` allows Unicode text and loads the font
+  from `fonts/` (`\setmainfont{texgyreheros-regular.otf}[Path=fonts/]`;
+  for a system font write e.g. `\setmainfont{Helvetica}`), `babel` selects German hyphenation. The
   text is set in 14/16 pt, justified, with one empty line (16 pt) between
   paragraphs and the first baseline 16 pt below the border, as in the
   Typst and CSS versions. `\itemimage{...}` puts one image on its own

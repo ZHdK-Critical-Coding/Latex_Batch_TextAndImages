@@ -29,11 +29,14 @@ Eine TeX-Distribution installieren:
 - **Linux**: [TeX Live](https://tug.org/texlive/), z. B.
   `sudo apt install texlive-xetex texlive-latex-extra`.
 
+Die Schrift TeX Gyre Heros (ein freier Helvetica-Klon) liegt in `fonts/`,
+es muss nichts installiert werden.
+
 Die Installation mit `xelatex --version` prüfen. Ein Editor mit
 LaTeX-Unterstützung hilft, z. B. Visual Studio Code mit der Erweiterung
 **LaTeX Workshop**.
 
-Lizenz: MIT
+Lizenz: MIT. Schrift: TeX Gyre Heros, [GUST Font License](fonts/GUST-FONT-LICENSE.txt).
 
 ## Ausführen
 
@@ -65,6 +68,26 @@ Dasselbe von Hand:
 xelatex -jobname=document -output-directory=output template.tex
 ```
 
+## Auf GitHub
+
+Jeder Push auf `main` erzeugt das PDF auf GitHub
+(`.github/workflows/build.yml`, mit
+[GitHub Action for LaTeX](https://github.com/marketplace/actions/github-action-for-latex)).
+Herunterladen im Tab **Actions**: den Durchlauf öffnen, dann **Artifacts →
+document**. **Run workflow** startet einen Build von Hand.
+
+Ein Tag, der mit `v` beginnt, erstellt zusätzlich ein Release mit dem PDF:
+
+```sh
+git tag v1.0
+git push origin v1.0
+```
+
+Der Workflow verwendet TeX Live 2026 (`texlive_version`) und installiert
+die Schriften aus `fonts/` (`extra_fonts`). `pre_compile` führt
+`./build.sh --content-only` aus, das nur `output/content.tex` schreibt;
+danach kompiliert die Action `template.tex` mit XeLaTeX.
+
 ## Coding-Hilfe
 
 LaTeX kann die Dateien eines Ordners nicht selbst auflisten. Das übernimmt
@@ -88,10 +111,13 @@ Datei einbindet.
   `xelatex -jobname=document -output-directory=output template.tex`; der
   Jobname benennt das PDF. `-interaction=nonstopmode -halt-on-error` bricht
   beim ersten Fehler ab, statt auf eine Eingabe zu warten. Die
-  Hilfsdateien `.aux` werden am Schluss gelöscht.
+  Hilfsdateien `.aux` werden am Schluss gelöscht. `./build.sh
+  --content-only` hört nach dem Schreiben von `output/content.tex` auf
+  (für GitHub).
 - **`template.tex`**: das Layout. `geometry` setzt A5 mit 12 mm Rand
-  (z. B. `a4paper` ausprobieren), `fontspec` erlaubt Unicode-Text und
-  Systemschriften (`\setmainfont{Helvetica}`), `babel` wählt die deutsche
+  (z. B. `a4paper` ausprobieren), `fontspec` erlaubt Unicode-Text und lädt die
+  Schrift aus `fonts/` (`\setmainfont{texgyreheros-regular.otf}[Path=fonts/]`;
+  für eine Systemschrift z. B. `\setmainfont{Helvetica}`), `babel` wählt die deutsche
   Silbentrennung. Der Text steht in 14/16 pt im Blocksatz, mit einer
   Leerzeile (16 pt) zwischen den Absätzen und der ersten Grundlinie 16 pt
   unter dem Rand, wie in der Typst- und der CSS-Version.
